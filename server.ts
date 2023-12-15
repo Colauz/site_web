@@ -16,10 +16,15 @@ async function handler(req: Request): Promise<Response> {
             const formData = await req.json();
             console.log("Données reçues :", formData);
 
-            // Envoie la requête au serveur des utilisateurs
+            const credentials = btoa("Admin:1234"); 
+            const authHeader = `Basic ${credentials}`;
+
             const response = await fetch("http://localhost:8001/add-user", {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': authHeader
+                },
                 body: JSON.stringify(formData)
             });
 

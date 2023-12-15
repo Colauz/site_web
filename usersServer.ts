@@ -1,9 +1,12 @@
-// usersServer.ts
 import { serve } from "https://deno.land/std@0.123.0/http/server.ts";
 import { join } from "https://deno.land/std@0.123.0/path/mod.ts";
 
 const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
+
+// Remplacer par vos propres identifiants
+const USERNAME = "Admin";
+const PASSWORD = "1234";
 
 async function initializeUsersFile() {
     try {
@@ -13,8 +16,26 @@ async function initializeUsersFile() {
     }
 }
 
+function checkAuth(req: Request): boolean {
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) return false;
+
+    const encoded = authHeader.replace("Basic ", "");
+    const decoded = atob(encoded); // Decode base64
+    const [username, password] = decoded.split(":");
+
+    return username === USERNAME && password === PASSWORD;
+}
+
 async function handler(req: Request): Promise<Response> {
-    // Gestion des requêtes GET à la racine pour servir le fichier users.json
+    // Vérifier l'authentification pour toutes les requêtes
+    if (!checkAuth(req)) {
+        return new Response("Non autorisé", {
+            status: 401,
+            headers: { "WWW-Authenticate": 'Basic realm="Accès restreint"', "Content-Type": "text/plain" }
+        });
+    }
+
     if (req.method === "GET" && req.url.endsWith("/")) {
         try {
             const usersData = await Deno.readTextFile(usersFile);
@@ -28,7 +49,6 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
-    // Gestion des requêtes POST à /add-user
     if (req.method === "POST" && req.url.endsWith("/add-user")) {
         try {
             const formData = await req.json();
