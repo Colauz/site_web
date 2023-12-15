@@ -36,23 +36,16 @@ async function handler(req: Request): Promise<Response> {
         });
     }
 
-    if (req.method === "GET" && req.url.endsWith("/")) {
-        try {
-            const usersData = await Deno.readTextFile(usersFile);
-            return new Response(usersData, {
-                status: 200,
-                headers: { "Content-Type": "application/json" },
-            });
-        } catch (error) {
-            console.error("Erreur lors de la récupération des utilisateurs :", error.message);
-            return new Response("Erreur lors de la récupération des utilisateurs", { status: 500 });
-        }
-    }
-
     if (req.method === "POST" && req.url.endsWith("/add-user")) {
         try {
             const formData = await req.json();
             const users = JSON.parse(await Deno.readTextFile(usersFile)) || [];
+
+            // Vérification de l'unicité du pseudonyme
+            if (users.some(user => user.username === formData.username)) {
+                return new Response("Pseudonyme déjà utilisé, veuillez en choisir un autre.", { status: 400 });
+            }
+
             const userId = users.length + 1;
             const newUser = { id: userId, ...formData };
             users.push(newUser);

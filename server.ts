@@ -43,6 +43,21 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
+    // Gestion de la requête pour le fichier CSS
+    if (path === "/style.css") {
+        try {
+            const filePath = join(currentDirectory, "style.css");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/css" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture du fichier CSS :", error.message);
+            return new Response("Fichier CSS non trouvé", { status: 404 });
+        }
+    }
+
     let filePath = path === "/" ? "index.html" : path.substring(1);
     filePath = join(currentDirectory, filePath);
     let contentType = "text/html"; 

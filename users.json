@@ -1,8 +1,23 @@
 [
   {
     "id": 1,
+    "firstName": "Niaphe",
+    "lastName": "Laurian",
+    "username": "Jamin",
+    "password": "ehD3r47FV*"
+  },
+  {
+    "id": 2,
+    "firstName": "cccccc",
+    "lastName": "cccccc",
+    "username": "Jamind",
+    "password": "ehD3r47FV*"
+  },
+  {
+    "id": 3,
     "firstName": "Laurian",
     "lastName": "Jamin",
+    "username": "Jaminddd",
     "password": "ehD3r47FV*"
   }
 ]

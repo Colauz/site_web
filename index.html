@@ -4,14 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test site web</title>
+    <title>Inscription</title>
+    <link rel="stylesheet" href="style.css">
     <script src="main.js"></script>
 </head>
 
 <body>
-    <h1>Test Site Web</h1>
+    <h1>Inscription</h1>
     <input type="text" id="firstNameEntry" placeholder="Entrez votre prénom">
     <input type="text" id="lastNameEntry" placeholder="Entrez votre nom">
+    <input type="text" id="usernameEntry" placeholder="Entrez votre pseudo"> <!-- Nouveau champ pour le pseudo -->
     <input type="password" style="display:none" autocomplete="off">
     <input type="password" id="uniquePasswordEntry" placeholder="Entrez votre mot de passe" autocomplete="off">
     <button onclick="addUser()">Ajouter un utilisateur</button>
