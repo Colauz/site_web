@@ -1,0 +1,17 @@
+{
+    "$schema": "https://deno.land/x/denon/schema.json",
+    "scripts": {
+        "start": {
+            "cmd": "deno run --allow-net --allow-read --allow-write server.ts",
+            "desc": "Run the main server",
+            "watch": true,
+            "unstable": true
+        },
+        "startUsersServer": {
+            "cmd": "deno run --allow-net --allow-read --allow-write usersServer.ts",
+            "desc": "Run the users server",
+            "watch": true,
+            "unstable": true
+        }
+    }
+}
