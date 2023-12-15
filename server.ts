@@ -15,10 +15,10 @@ async function handler(req: Request): Promise<Response> {
         try {
             const formData = await req.json();
             console.log("Données reçues :", formData);
-
+    
             const credentials = btoa("Admin:1234"); 
             const authHeader = `Basic ${credentials}`;
-
+    
             const response = await fetch("http://localhost:8001/add-user", {
                 method: 'POST',
                 headers: { 
@@ -27,11 +27,14 @@ async function handler(req: Request): Promise<Response> {
                 },
                 body: JSON.stringify(formData)
             });
-
+    
+            // Modification ici
             if (!response.ok) {
-                throw new Error('Erreur lors de la communication avec le serveur des utilisateurs');
+                const errorText = await response.text();
+                console.error("Erreur lors de l'ajout de l'utilisateur :", errorText);
+                return new Response(errorText, { status: response.status });
             }
-
+    
             const newUser = await response.json();
             return new Response(JSON.stringify(newUser), {
                 status: 200,
@@ -42,8 +45,7 @@ async function handler(req: Request): Promise<Response> {
             return new Response("Erreur lors de l'ajout de l'utilisateur", { status: 500 });
         }
     }
-
-    // Gestion de la requête pour le fichier CSS
+    
     if (path === "/style.css") {
         try {
             const filePath = join(currentDirectory, "style.css");

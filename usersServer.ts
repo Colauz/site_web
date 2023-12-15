@@ -4,7 +4,6 @@ import { join } from "https://deno.land/std@0.123.0/path/mod.ts";
 const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
 
-// Remplacer par vos propres identifiants
 const USERNAME = "Admin";
 const PASSWORD = "1234";
 
@@ -28,7 +27,6 @@ function checkAuth(req: Request): boolean {
 }
 
 async function handler(req: Request): Promise<Response> {
-    // Vérifier l'authentification pour toutes les requêtes
     if (!checkAuth(req)) {
         return new Response("Non autorisé", {
             status: 401,
@@ -41,10 +39,9 @@ async function handler(req: Request): Promise<Response> {
             const formData = await req.json();
             const users = JSON.parse(await Deno.readTextFile(usersFile)) || [];
 
-            // Vérification de l'unicité du pseudonyme
             if (users.some(user => user.username === formData.username)) {
                 return new Response("Pseudonyme déjà utilisé, veuillez en choisir un autre.", { status: 400 });
-            }
+            }            
 
             const userId = users.length + 1;
             const newUser = { id: userId, ...formData };
@@ -60,7 +57,6 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
-    // Réponse par défaut pour les autres requêtes/méthodes
     return new Response("Méthode non supportée", { status: 405 });
 }
 
