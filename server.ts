@@ -11,30 +11,57 @@ async function handler(req: Request): Promise<Response> {
         return new Response(null, { status: 404 });
     }
 
+    if (path === "/") {
+        try {
+            const filePath = join(currentDirectory, "accueil.html");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/html" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture de accueil.html :", error.message);
+            return new Response("Page non trouvée", { status: 404 });
+        }
+    }
+    
+    if (path === "/index") {
+        try {
+            const filePath = join(currentDirectory, "index.html");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/html" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture de index.html :", error.message);
+            return new Response("Page non trouvée", { status: 404 });
+        }
+    }
+
     if (req.method === "POST" && path === "/add-user") {
         try {
             const formData = await req.json();
             console.log("Données reçues :", formData);
-    
-            const credentials = btoa("Admin:1234"); 
+
+            const credentials = btoa("Admin:1234");
             const authHeader = `Basic ${credentials}`;
-    
+
             const response = await fetch("http://localhost:8001/add-user", {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': authHeader
                 },
                 body: JSON.stringify(formData)
             });
-    
-            // Modification ici
+
             if (!response.ok) {
                 const errorText = await response.text();
                 console.error("Erreur lors de l'ajout de l'utilisateur :", errorText);
                 return new Response(errorText, { status: response.status });
             }
-    
+
             const newUser = await response.json();
             return new Response(JSON.stringify(newUser), {
                 status: 200,
@@ -45,7 +72,7 @@ async function handler(req: Request): Promise<Response> {
             return new Response("Erreur lors de l'ajout de l'utilisateur", { status: 500 });
         }
     }
-    
+
     if (path === "/style.css") {
         try {
             const filePath = join(currentDirectory, "style.css");
@@ -60,15 +87,26 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
-    let filePath = path === "/" ? "index.html" : path.substring(1);
-    filePath = join(currentDirectory, filePath);
-    let contentType = "text/html"; 
+    if (path === "/style_accueil.css") {
+        try {
+            const filePath = join(currentDirectory, "style_accueil.css");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/css" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture du fichier style_accueil.css :", error.message);
+            return new Response("Fichier CSS non trouvé", { status: 404 });
+        }
+    }
 
     try {
+        const filePath = join(currentDirectory, path.substring(1));
         const file = await Deno.readFile(filePath);
         const fileContent = new TextDecoder().decode(file);
         return new Response(fileContent, {
-            headers: { "content-type": contentType }
+            headers: { "content-type": "text/html" }
         });
     } catch (error) {
         console.error("Erreur lors de la lecture du fichier :", error.message);
