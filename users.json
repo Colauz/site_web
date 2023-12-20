@@ -1,1 +1,23 @@
-[]
+[
+  {
+    "id": 1,
+    "firstName": "Laurian",
+    "lastName": "Jamin",
+    "username": "Coucou",
+    "password": "ehD3r47FV*"
+  },
+  {
+    "id": 2,
+    "firstName": "Lauyrian",
+    "lastName": "Jamin",
+    "username": "Hellofirend",
+    "password": "coucou515DµQ*"
+  },
+  {
+    "id": 3,
+    "firstName": "HELLO",
+    "lastName": "COUCOU",
+    "username": "PPPPP",
+    "password": "Dhyu*459"
+  }
+]

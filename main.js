@@ -42,4 +42,44 @@ async function addUser() {
             alert(errorText);
         }
     }
+    if (response.ok) {
+        const newUser = await response.json();
+
+        document.cookie = `username=${newUser.username}; path=/`;
+
+        window.location.href = 'accueil.html';
+    } else {
+        const errorText = await response.text();
+        alert('Erreur lors de l\'inscription: ' + errorText);
+    }
+}
+
+function logoutUser() {
+
+    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    window.location.href = 'accueil.html';
+}
+
+async function loginUser() {
+    const username = document.getElementById('loginUsername').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const response = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        if (response.ok) {
+            const userData = await response.json();
+            document.cookie = `username=${userData.username}; path=/`;
+            window.location.href = 'accueil.html';
+        } else {
+            alert('Identifiants incorrects. Veuillez réessayer.');
+        }
+    } catch (error) {
+        console.error('Erreur lors de la connexion:', error);
+        alert('Erreur lors de la connexion. Veuillez réessayer.');
+    }
 }

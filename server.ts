@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.123.0/http/server.ts";
 import { join } from "https://deno.land/std@0.123.0/path/mod.ts";
 
 const currentDirectory = Deno.cwd();
+const usersFile = join(currentDirectory, "users.json");
 
 async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
@@ -27,14 +28,14 @@ async function handler(req: Request): Promise<Response> {
     
     if (path === "/index") {
         try {
-            const filePath = join(currentDirectory, "index.html");
+            const filePath = join(currentDirectory, "inscription.html");
             const file = await Deno.readFile(filePath);
             const fileContent = new TextDecoder().decode(file);
             return new Response(fileContent, {
                 headers: { "content-type": "text/html" }
             });
         } catch (error) {
-            console.error("Erreur lors de la lecture de index.html :", error.message);
+            console.error("Erreur lors de la lecture de inscription.html :", error.message);
             return new Response("Page non trouvée", { status: 404 });
         }
     }
@@ -75,14 +76,14 @@ async function handler(req: Request): Promise<Response> {
 
     if (path === "/style.css") {
         try {
-            const filePath = join(currentDirectory, "style.css");
+            const filePath = join(currentDirectory, "style_inscription.css");
             const file = await Deno.readFile(filePath);
             const fileContent = new TextDecoder().decode(file);
             return new Response(fileContent, {
                 headers: { "content-type": "text/css" }
             });
         } catch (error) {
-            console.error("Erreur lors de la lecture du fichier CSS :", error.message);
+            console.error("Erreur lors de la lecture du fichier CSS d'inscription :", error.message);
             return new Response("Fichier CSS non trouvé", { status: 404 });
         }
     }
@@ -98,6 +99,28 @@ async function handler(req: Request): Promise<Response> {
         } catch (error) {
             console.error("Erreur lors de la lecture du fichier style_accueil.css :", error.message);
             return new Response("Fichier CSS non trouvé", { status: 404 });
+        }
+    }
+
+    if (req.method === "POST" && path === "/login") {
+        try {
+            const loginData = await req.json();
+            const users = JSON.parse(await Deno.readTextFile(usersFile));
+    
+            const user = users.find(u => u.username === loginData.username);
+            if (user && user.password === loginData.password) {
+                // Les identifiants sont corrects
+                return new Response(JSON.stringify({ username: user.username }), {
+                    status: 200,
+                    headers: { "Content-Type": "application/json" }
+                });
+            } else {
+                // Identifiants incorrects
+                return new Response("Identifiants incorrects", { status: 401 });
+            }
+        } catch (error) {
+            console.error("Erreur lors de la connexion :", error.message);
+            return new Response("Erreur lors de la connexion", { status: 500 });
         }
     }
 

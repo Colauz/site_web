@@ -10,12 +10,45 @@
 
 <body>
     <div class="header">
-        <a href="index.html" class="inscription-btn">Inscription</a>
+        <a href="inscription.html" class="inscription-btn">Inscription</a>
+    </div>
+    <div id="loginButton" style="display: block;">
+        <a href="connexion.html"><button>Connexion</button></a>
+    </div>
+
+    <div id="logoutButton" style="display: none;">
+        <button onclick="logoutUser()">Déconnexion</button>
     </div>
 
     <h1>Bienvenue sur notre site!</h1>
-    <!-- Autres contenus de la page accueil ici -->
 
+    <script>
+        window.onload = function () {
+            const username = getCookie("username");
+            if (username) {
+                // Masquer le bouton d'inscription/connexion
+                document.getElementById('loginButton').style.display = 'none';
+                document.querySelector('.inscription-btn').style.display = 'none';
+                document.getElementById('logoutButton').style.display = 'block';
+            }
+        };
+
+        function getCookie(name) {
+            let cookieArr = document.cookie.split(";");
+            for (let i = 0; i < cookieArr.length; i++) {
+                let cookiePair = cookieArr[i].split("=");
+                if (name == cookiePair[0].trim()) {
+                    return decodeURIComponent(cookiePair[1]);
+                }
+            }
+            return null;
+        }
+
+        function logoutUser() {
+            document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+            window.location.href = 'accueil.html';
+        }
+    </script>
 </body>
 
 </html>
