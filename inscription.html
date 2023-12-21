@@ -5,19 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style_inscription.css">
     <script src="main.js"></script>
 </head>
 
 <body>
     <a href="accueil.html"><button id="homeButton">Retourner à la page d'accueil</button></a>
-    <h1>Inscription</h1>
-    <input type="text" id="firstNameEntry" placeholder="Entrez votre prénom">
-    <input type="text" id="lastNameEntry" placeholder="Entrez votre nom">
-    <input type="text" id="usernameEntry" placeholder="Entrez votre pseudo">
-    <input type="password" style="display:none" autocomplete="off">
-    <input type="password" id="uniquePasswordEntry" placeholder="Entrez votre mot de passe" autocomplete="off">
-    <button onclick="addUser()">Ajouter un utilisateur</button>
+    <div class="inscription-container">
+        <h1>Inscription</h1>
+        <input type="text" id="firstNameEntry" placeholder="Entrez votre prénom">
+        <input type="text" id="lastNameEntry" placeholder="Entrez votre nom">
+        <input type="text" id="usernameEntry" placeholder="Entrez votre pseudo">
+        <input type="password" id="uniquePasswordEntry" placeholder="Entrez votre mot de passe">
+        <button onclick="addUser()" class="btn">Ajouter un utilisateur</button>
+        <p class="already-registered">Déjà inscrit? <a href="connexion.html">Connectez-vous</a></p>
+    </div>
 </body>
 
 </html>

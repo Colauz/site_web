@@ -83,3 +83,35 @@ async function loginUser() {
         alert('Erreur lors de la connexion. Veuillez réessayer.');
     }
 }
+
+window.onload = function() {
+    const username = getCookie("username");
+    if (username) {
+        document.getElementById('inscriptionButton').style.display = 'none';
+        document.getElementById('loginButton').style.display = 'none';
+        document.getElementById('logoutButton').style.display = 'block';
+    } else {
+        document.getElementById('inscriptionButton').style.display = 'block';
+        document.getElementById('loginButton').style.display = 'block';
+        document.getElementById('logoutButton').style.display = 'none';
+    }
+};
+
+// Fonctions getCookie et logoutUser...
+
+
+function getCookie(name) {
+    let cookieArr = document.cookie.split(";");
+    for (let i = 0; i < cookieArr.length; i++) {
+        let cookiePair = cookieArr[i].split("=");
+        if (name == cookiePair[0].trim()) {
+            return decodeURIComponent(cookiePair[1]);
+        }
+    }
+    return null;
+}
+
+function logoutUser() {
+    document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    window.location.href = 'accueil.html';
+}

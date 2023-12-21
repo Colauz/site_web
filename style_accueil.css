@@ -6,14 +6,23 @@ body {
     display: flex;
     justify-content: flex-end;
     padding: 10px;
+    align-items: center;
 }
 
-.inscription-btn {
+.btn,
+.button-like {
     padding: 10px 20px;
+    margin-left: 10px;
     text-decoration: none;
     background-color: blue;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    box-sizing: border-box;
+    display: inline-block;
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.5;
 }

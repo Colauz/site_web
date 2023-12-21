@@ -102,6 +102,34 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
+    if (path === "/style_inscription.css") {
+        try {
+            const filePath = join(currentDirectory, "style_inscription.css");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/css" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture du fichier style_inscription.css :", error.message);
+            return new Response("Fichier CSS non trouvé", { status: 404 });
+        }
+    }
+
+    if (path === "/style_connexion.css") {
+        try {
+            const filePath = join(currentDirectory, "style_connexion.css");
+            const file = await Deno.readFile(filePath);
+            const fileContent = new TextDecoder().decode(file);
+            return new Response(fileContent, {
+                headers: { "content-type": "text/css" }
+            });
+        } catch (error) {
+            console.error("Erreur lors de la lecture du fichier style_connexion.css :", error.message);
+            return new Response("Fichier CSS non trouvé", { status: 404 });
+        }
+    }
+
     if (req.method === "POST" && path === "/login") {
         try {
             const loginData = await req.json();

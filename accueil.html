@@ -6,49 +6,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil</title>
     <link rel="stylesheet" href="style_accueil.css">
+    <script src="main.js"></script>
 </head>
 
 <body>
     <div class="header">
-        <a href="inscription.html" class="inscription-btn">Inscription</a>
-    </div>
-    <div id="loginButton" style="display: block;">
-        <a href="connexion.html"><button>Connexion</button></a>
-    </div>
+        <a href="inscription.html" id="inscriptionButton" class="btn">Inscription</a>
 
-    <div id="logoutButton" style="display: none;">
-        <button onclick="logoutUser()">Déconnexion</button>
+        <div id="loginButton" style="display: block;">
+            <a href="connexion.html" class="btn">Connexion</a>
+        </div>
+
+        <div id="logoutButton" style="display: none;">
+            <button onclick="logoutUser()" class="btn">Déconnexion</button>
+        </div>
     </div>
 
     <h1>Bienvenue sur notre site!</h1>
-
-    <script>
-        window.onload = function () {
-            const username = getCookie("username");
-            if (username) {
-                // Masquer le bouton d'inscription/connexion
-                document.getElementById('loginButton').style.display = 'none';
-                document.querySelector('.inscription-btn').style.display = 'none';
-                document.getElementById('logoutButton').style.display = 'block';
-            }
-        };
-
-        function getCookie(name) {
-            let cookieArr = document.cookie.split(";");
-            for (let i = 0; i < cookieArr.length; i++) {
-                let cookiePair = cookieArr[i].split("=");
-                if (name == cookiePair[0].trim()) {
-                    return decodeURIComponent(cookiePair[1]);
-                }
-            }
-            return null;
-        }
-
-        function logoutUser() {
-            document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-            window.location.href = 'accueil.html';
-        }
-    </script>
 </body>
 
 </html>

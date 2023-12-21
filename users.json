@@ -19,5 +19,12 @@
     "lastName": "COUCOU",
     "username": "PPPPP",
     "password": "Dhyu*459"
+  },
+  {
+    "id": 4,
+    "firstName": "Salut",
+    "lastName": "Michel",
+    "username": "Laurian",
+    "password": "ehD3r47FV*"
   }
 ]
