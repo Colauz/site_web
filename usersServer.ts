@@ -37,6 +37,7 @@ async function handler(req: Request): Promise<Response> {
     if (req.method === "POST" && req.url.endsWith("/add-user")) {
         try {
             const formData = await req.json();
+            formData.status = "user";
             const users = JSON.parse(await Deno.readTextFile(usersFile)) || [];
 
             if (users.some(user => user.username === formData.username)) {

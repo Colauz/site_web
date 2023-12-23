@@ -5,7 +5,7 @@ const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
 
 async function handler(req: Request): Promise<Response> {
-    const url = new URL(req.url
+    const url = new URL(req.url);
     let path = url.pathname;
 
     if (path === "/favicon.ico") {
@@ -44,6 +44,8 @@ async function handler(req: Request): Promise<Response> {
         try {
             const formData = await req.json();
             console.log("Données reçues :", formData);
+
+            formData.inscriptionDate = new Date().toISOString();
 
             const credentials = btoa("Admin:1234");
             const authHeader = `Basic ${credentials}`;
@@ -137,13 +139,12 @@ async function handler(req: Request): Promise<Response> {
     
             const user = users.find(u => u.username === loginData.username);
             if (user && user.password === loginData.password) {
-                // Les identifiants sont corrects
+                console.log(`Utilisateur connecté : ${user.username}`); // Ajout de cette ligne
                 return new Response(JSON.stringify({ username: user.username }), {
                     status: 200,
                     headers: { "Content-Type": "application/json" }
                 });
             } else {
-                // Identifiants incorrects
                 return new Response("Identifiants incorrects", { status: 401 });
             }
         } catch (error) {
@@ -151,6 +152,31 @@ async function handler(req: Request): Promise<Response> {
             return new Response("Erreur lors de la connexion", { status: 500 });
         }
     }
+
+    if (req.method === "POST" && path === "/logout") {
+        try {
+            const logoutData = await req.json();
+            console.log(`Utilisateur déconnecté : ${logoutData.username}`);
+
+            return new Response("Déconnexion réussie", { status: 200 });
+        } catch (error) {
+            console.error("Erreur lors de la déconnexion :", error.message);
+            return new Response("Erreur lors de la déconnexion", { status: 500 });
+        }
+    }
+
+    
+if (path === "/get-users") {
+    try {
+        const users = JSON.parse(await Deno.readTextFile(usersFile));
+        return new Response(JSON.stringify(users), {
+            headers: { "Content-Type": "application/json" }
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des utilisateurs :", error.message);
+        return new Response("Erreur lors de la récupération des utilisateurs", { status: 500 });
+    }
+}
 
     try {
         const filePath = join(currentDirectory, path.substring(1));

@@ -26,3 +26,25 @@ body {
     font-size: 1rem;
     line-height: 1.5;
 }
+
+.user-card {
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    margin: 10px;
+    background-color: white;
+}
+
+.user-name {
+    color: #333;
+    margin: 0;
+}
+
+.user-info {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+    display: block;
+}

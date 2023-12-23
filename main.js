@@ -108,7 +108,65 @@ function getCookie(name) {
     return null;
 }
 
-function logoutUser() {
+async function logoutUser() {
+    const username = getCookie("username");
+    
+    try {
+        await fetch('/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
+
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
     window.location.href = 'accueil.html';
 }
+
+async function fetchUsers() {
+    try {
+        const response = await fetch('/get-users');
+        if (!response.ok) {
+            throw new Error('Problème de réseau ou de serveur');
+        }
+        const users = await response.json();
+        displayUsers(users);
+    } catch (error) {
+        console.error('Erreur lors de la récupération des utilisateurs:', error);
+    }
+}
+
+function displayUsers(users) {
+    const container = document.getElementById('userListContainer');
+    container.innerHTML = ''; // Efface les anciens utilisateurs
+
+    users.forEach(user => {
+        const userCard = document.createElement('div');
+        userCard.className = 'user-card';
+
+        const userName = document.createElement('h3');
+        userName.className = 'user-name';
+        userName.textContent = `Pseudo: ${user.username}`;
+
+        const userInfo = document.createElement('p');
+        userInfo.className = 'user-info';
+        userInfo.textContent = `Inscription: ${formatDate(user.inscriptionDate)}`;
+        
+
+        userCard.appendChild(userName);
+        userCard.appendChild(userInfo);
+
+        container.appendChild(userCard);
+    });
+}
+
+function formatDate(dateString) {
+    const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+    return new Date(dateString).toLocaleDateString('fr-FR', options);
+}
+
+
+document.addEventListener('DOMContentLoaded', fetchUsers);
+
