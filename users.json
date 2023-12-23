@@ -26,5 +26,12 @@
     "lastName": "Michel",
     "username": "Laurian",
     "password": "ehD3r47FV*"
+  },
+  {
+    "id": 5,
+    "firstName": "Corentin",
+    "lastName": "Jamin",
+    "username": "Jaministre",
+    "password": "7211682kK*"
   }
 ]

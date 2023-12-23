@@ -97,9 +97,6 @@ window.onload = function() {
     }
 };
 
-// Fonctions getCookie et logoutUser...
-
-
 function getCookie(name) {
     let cookieArr = document.cookie.split(";");
     for (let i = 0; i < cookieArr.length; i++) {

@@ -5,7 +5,7 @@ const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
 
 async function handler(req: Request): Promise<Response> {
-    const url = new URL(req.url);
+    const url = new URL(req.url
     let path = url.pathname;
 
     if (path === "/favicon.ico") {
