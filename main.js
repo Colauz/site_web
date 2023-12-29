@@ -69,13 +69,8 @@ async function logoutUser() {
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
     document.cookie = 'userStatus=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
 
-    // Rafraîchir la liste des utilisateurs après la déconnexion
     await fetchUsers(); 
-    // Ou rediriger vers 'accueil.html' si c'est nécessaire
-    // window.location.href = 'accueil.html';
 }
-
-
 
 async function loginUser() {
     const username = document.getElementById('loginUsername').value;
@@ -104,6 +99,8 @@ async function loginUser() {
 
 window.onload = function() {
     const username = getCookie("username");
+    const userStatus = getCookie("userStatus");
+
     if (username) {
         document.getElementById('inscriptionButton').style.display = 'none';
         document.getElementById('loginButton').style.display = 'none';
@@ -113,6 +110,15 @@ window.onload = function() {
         document.getElementById('loginButton').style.display = 'block';
         document.getElementById('logoutButton').style.display = 'none';
     }
+
+    const manageButtons = document.getElementsByClassName('manage-btn');
+
+    if (userStatus !== 'admin') {
+        for (let i = 0; i < manageButtons.length; i++) {
+            manageButtons[i].style.display = 'none';
+        }
+    }
+
     fetchUsers();
 };
 
@@ -140,9 +146,27 @@ async function logoutUser() {
         console.error('Erreur lors de la déconnexion:', error);
     }
 
+    // Effacer les cookies
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+    document.cookie = 'userStatus=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Mettre à jour l'interface utilisateur pour refléter l'état non connecté
+    updateUIForLoggedOutUser();
+
     window.location.href = 'accueil.html';
 }
+
+function updateUIForLoggedOutUser() {
+    document.getElementById('inscriptionButton').style.display = 'block';
+    document.getElementById('loginButton').style.display = 'block';
+    document.getElementById('logoutButton').style.display = 'none';
+
+    const manageButtons = document.getElementsByClassName('manage-btn');
+    for (let i = 0; i < manageButtons.length; i++) {
+        manageButtons[i].style.display = 'none';
+    }
+}
+
 
 async function fetchUsers() {
     try {
@@ -177,7 +201,6 @@ async function deleteUser(userId) {
         alert('Erreur lors de la suppression de l’utilisateur');
     }
 }
-
 
 function displayUsers(users) {
     const container = document.getElementById('userListContainer');
@@ -229,7 +252,6 @@ function displayUsers(users) {
     });
 }
 
-
 function formatDate(dateString) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString('fr-FR', options);
@@ -254,7 +276,6 @@ function showManageOptions(userId) {
         selectedUserCard.appendChild(deleteButton);
     }
 }
-
 
 document.addEventListener('DOMContentLoaded', fetchUsers);
 

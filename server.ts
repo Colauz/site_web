@@ -165,7 +165,6 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
-    
 if (path === "/get-users") {
     try {
         const users = JSON.parse(await Deno.readTextFile(usersFile));
@@ -197,7 +196,6 @@ if (req.method === "POST" && path === "/delete-user") {
         users = users.filter(user => user.id !== userId);
         await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
 
-        // Log de l'action de suppression
         console.log(`Utilisateur '${userToDelete.username}' supprimé par l'administrateur '${currentUser}'`);
 
         return new Response("Utilisateur supprimé", { status: 200 });
@@ -206,7 +204,6 @@ if (req.method === "POST" && path === "/delete-user") {
         return new Response("Erreur lors de la suppression de l'utilisateur", { status: 500 });
     }
 }
-
 
     try {
         const filePath = join(currentDirectory, path.substring(1));
