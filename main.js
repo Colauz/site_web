@@ -44,9 +44,8 @@ async function addUser() {
     }
     if (response.ok) {
         const newUser = await response.json();
-
         document.cookie = `username=${newUser.username}; path=/`;
-
+        document.cookie = `userStatus=user; path=/`; // Définir le statut comme 'user'
         window.location.href = 'accueil.html';
     } else {
         const errorText = await response.text();
@@ -74,6 +73,7 @@ async function loginUser() {
         if (response.ok) {
             const userData = await response.json();
             document.cookie = `username=${userData.username}; path=/`;
+            document.cookie = `userStatus=${userData.status}; path=/`; 
             window.location.href = 'accueil.html';
         } else {
             alert('Identifiants incorrects. Veuillez réessayer.');
@@ -138,13 +138,37 @@ async function fetchUsers() {
     }
 }
 
+async function deleteUser(userId) {
+    const currentUser = getCookie("username");
+
+    try {
+        const response = await fetch('/delete-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, currentUser })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors de la suppression de l’utilisateur');
+        }
+        alert('Utilisateur supprimé avec succès');
+        fetchUsers(); 
+    } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        alert('Erreur lors de la suppression de l’utilisateur');
+    }
+}
+
+
 function displayUsers(users) {
     const container = document.getElementById('userListContainer');
-    container.innerHTML = ''; // Efface les anciens utilisateurs
+    const currentUserStatus = getCookie("userStatus");
+    container.innerHTML = '';
 
     users.forEach(user => {
         const userCard = document.createElement('div');
         userCard.className = 'user-card';
+        userCard.id = `user-card-${user.id}`;
 
         const userName = document.createElement('h3');
         userName.className = 'user-name';
@@ -153,7 +177,30 @@ function displayUsers(users) {
         const userInfo = document.createElement('p');
         userInfo.className = 'user-info';
         userInfo.textContent = `Inscription: ${formatDate(user.inscriptionDate)}`;
-        
+
+        const userStatus = document.createElement('p');
+        userStatus.className = 'user-status';
+        userStatus.textContent = `Statut: ${user.status}`;
+        userCard.appendChild(userStatus);
+
+        if (currentUserStatus === "admin" && user.status !== "admin") {
+            const manageButton = document.createElement('button');
+            manageButton.textContent = 'Gérer';
+            manageButton.className = 'manage-btn';
+            manageButton.onclick = () => toggleManageOptions(user.id);
+            userCard.appendChild(manageButton);
+
+            const manageOptions = document.createElement('ul');
+            manageOptions.className = 'manage-options';
+            manageOptions.id = `manage-options-${user.id}`;
+
+            const deleteOption = document.createElement('li');
+            deleteOption.textContent = 'Supprimer';
+            deleteOption.onclick = () => deleteUser(user.id);
+            manageOptions.appendChild(deleteOption);
+
+            userCard.appendChild(manageOptions);
+        }
 
         userCard.appendChild(userName);
         userCard.appendChild(userInfo);
@@ -162,9 +209,30 @@ function displayUsers(users) {
     });
 }
 
+
 function formatDate(dateString) {
     const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
     return new Date(dateString).toLocaleDateString('fr-FR', options);
+}
+
+function toggleManageOptions(userId) {
+    const manageOptions = document.getElementById(`manage-options-${userId}`);
+    if (manageOptions.style.display === 'block') {
+        manageOptions.style.display = 'none';
+    } else {
+        manageOptions.style.display = 'block';
+    }
+}
+
+function showManageOptions(userId) {
+    const selectedUserCard = document.getElementById(`user-card-${userId}`);
+    if (!selectedUserCard.querySelector('.delete-btn')) {
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.className = 'delete-btn';
+        deleteButton.onclick = () => deleteUser(userId);
+        selectedUserCard.appendChild(deleteButton);
+    }
 }
 
 

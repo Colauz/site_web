@@ -20,7 +20,7 @@ function checkAuth(req: Request): boolean {
     if (!authHeader) return false;
 
     const encoded = authHeader.replace("Basic ", "");
-    const decoded = atob(encoded); // Decode base64
+    const decoded = atob(encoded); 
     const [username, password] = decoded.split(":");
 
     return username === USERNAME && password === PASSWORD;

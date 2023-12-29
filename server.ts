@@ -139,8 +139,8 @@ async function handler(req: Request): Promise<Response> {
     
             const user = users.find(u => u.username === loginData.username);
             if (user && user.password === loginData.password) {
-                console.log(`Utilisateur connecté : ${user.username}`); // Ajout de cette ligne
-                return new Response(JSON.stringify({ username: user.username }), {
+                console.log(`Utilisateur connecté : ${user.username}`);
+                return new Response(JSON.stringify({ username: user.username, status: user.status }), {
                     status: 200,
                     headers: { "Content-Type": "application/json" }
                 });
@@ -177,6 +177,36 @@ if (path === "/get-users") {
         return new Response("Erreur lors de la récupération des utilisateurs", { status: 500 });
     }
 }
+
+if (req.method === "POST" && path === "/delete-user") {
+    try {
+        const { userId, currentUser } = await req.json();
+        let users = JSON.parse(await Deno.readTextFile(usersFile));
+
+        const requestingUser = users.find(user => user.username === currentUser);
+
+        if (!requestingUser || requestingUser.status !== "admin") {
+            return new Response("Opération non autorisée", { status: 403 });
+        }
+
+        const userToDelete = users.find(user => user.id === userId);
+        if (!userToDelete) {
+            return new Response("Utilisateur non trouvé", { status: 404 });
+        }
+
+        users = users.filter(user => user.id !== userId);
+        await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
+
+        // Log de l'action de suppression
+        console.log(`Utilisateur '${userToDelete.username}' supprimé par l'administrateur '${currentUser}'`);
+
+        return new Response("Utilisateur supprimé", { status: 200 });
+    } catch (error) {
+        console.error("Erreur lors de la suppression de l'utilisateur :", error.message);
+        return new Response("Erreur lors de la suppression de l'utilisateur", { status: 500 });
+    }
+}
+
 
     try {
         const filePath = join(currentDirectory, path.substring(1));
