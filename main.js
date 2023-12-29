@@ -53,11 +53,29 @@ async function addUser() {
     }
 }
 
-function logoutUser() {
+async function logoutUser() {
+    const username = getCookie("username");
+    
+    try {
+        await fetch('/logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username })
+        });
+    } catch (error) {
+        console.error('Erreur lors de la déconnexion:', error);
+    }
 
     document.cookie = 'username=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
-    window.location.href = 'accueil.html';
+    document.cookie = 'userStatus=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/;';
+
+    // Rafraîchir la liste des utilisateurs après la déconnexion
+    await fetchUsers(); 
+    // Ou rediriger vers 'accueil.html' si c'est nécessaire
+    // window.location.href = 'accueil.html';
 }
+
+
 
 async function loginUser() {
     const username = document.getElementById('loginUsername').value;
@@ -95,6 +113,7 @@ window.onload = function() {
         document.getElementById('loginButton').style.display = 'block';
         document.getElementById('logoutButton').style.display = 'none';
     }
+    fetchUsers();
 };
 
 function getCookie(name) {
@@ -183,6 +202,7 @@ function displayUsers(users) {
         userStatus.textContent = `Statut: ${user.status}`;
         userCard.appendChild(userStatus);
 
+        const currentUserStatus = getCookie("userStatus");
         if (currentUserStatus === "admin" && user.status !== "admin") {
             const manageButton = document.createElement('button');
             manageButton.textContent = 'Gérer';
