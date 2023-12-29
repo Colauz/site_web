@@ -165,6 +165,34 @@ async function handler(req: Request): Promise<Response> {
         }
     }
 
+if (req.method === "POST" && path === "/promote-user") {
+    try {
+        const { userId, currentUser } = await req.json();
+
+        let users = JSON.parse(await Deno.readTextFile(usersFile));
+
+        const requestingUser = users.find(user => user.username === currentUser);
+
+        if (!requestingUser || requestingUser.status !== "admin") {
+            return new Response("Opération non autorisée", { status: 403 });
+        }
+
+        const userToPromote = users.find(user => user.id === userId);
+        if (!userToPromote) {
+            return new Response("Utilisateur non trouvé", { status: 404 });
+        }
+
+        userToPromote.status = "admin";
+
+        await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
+
+        return new Response("Utilisateur promu en administrateur", { status: 200 });
+    } catch (error) {
+        console.error("Erreur lors de la promotion de l'utilisateur :", error.message);
+        return new Response("Erreur lors de la promotion de l'utilisateur", { status: 500 });
+    }
+}
+
 if (path === "/get-users") {
     try {
         const users = JSON.parse(await Deno.readTextFile(usersFile));
@@ -217,6 +245,7 @@ if (req.method === "POST" && path === "/delete-user") {
         return new Response("Page non trouvée", { status: 404 });
     }
 }
+
 
 console.log("Serveur principal démarré sur http://localhost:8000");
 serve(handler, { port: 8000 });

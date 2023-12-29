@@ -242,6 +242,11 @@ function displayUsers(users) {
             deleteOption.onclick = () => deleteUser(user.id);
             manageOptions.appendChild(deleteOption);
 
+            const promoteOption = document.createElement('li');
+            promoteOption.textContent = 'Promouvoir en admin';
+            promoteOption.onclick = () => promoteUser(user.id);
+            manageOptions.appendChild(promoteOption);
+
             userCard.appendChild(manageOptions);
         }
 
@@ -274,6 +279,27 @@ function showManageOptions(userId) {
         deleteButton.className = 'delete-btn';
         deleteButton.onclick = () => deleteUser(userId);
         selectedUserCard.appendChild(deleteButton);
+    }
+}
+
+async function promoteUser(userId) {
+    const currentUser = getCookie("username");
+
+    try {
+        const response = await fetch('/promote-user', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, currentUser })
+        });
+
+        if (!response.ok) {
+            throw new Error('Erreur lors de la promotion de l’utilisateur');
+        }
+        alert('Utilisateur promu en administrateur avec succès');
+        fetchUsers();
+    } catch (error) {
+        console.error('Erreur lors de la promotion:', error);
+        alert('Erreur lors de la promotion de l’utilisateur');
     }
 }
 
