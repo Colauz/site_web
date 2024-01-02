@@ -217,6 +217,32 @@ if (path === "/get-users") {
     }
 }
 
+if (req.method === "POST" && path === "/initiate-demotion-vote") {
+    try {
+        const { adminId, currentUser } = await req.json();
+        let users = JSON.parse(await Deno.readTextFile(usersFile));
+        let votes = JSON.parse(await Deno.readTextFile(votesFile));
+
+        // Vérifiez si un vote est déjà en cours
+        if (votes.length > 0) {
+            return new Response("Un vote est déjà en cours", { status: 403 });
+        }
+
+        const initiatingUser = users.find(user => user.username === currentUser);
+        if (!initiatingUser || initiatingUser.status !== "admin") {
+            return new Response("Seuls les administrateurs peuvent initier un vote", { status: 403 });
+        }
+
+        votes.push({ adminId: adminId, votes: { oui: 0, non: 0 }, aVoté: [] });
+        await Deno.writeTextFile(votesFile, JSON.stringify(votes, null, 2));
+
+        return new Response("Vote pour la démotion initié", { status: 200 });
+    } catch (error) {
+        console.error("Erreur lors de l'initiation du vote pour démotion :", error.message);
+        return new Response("Erreur lors de l'initiation du vote pour démotion", { status: 500 });
+    }
+}
+
 if (req.method === "POST" && path === "/cast-vote") {
     try {
         const { adminId, vote, currentUser } = await req.json();
@@ -228,27 +254,26 @@ if (req.method === "POST" && path === "/cast-vote") {
             return new Response("Seuls les administrateurs peuvent voter", { status: 403 });
         }
 
-        let currentVote = votes.find(vote => vote.adminId === adminId);
+        let currentVote = votes.find(v => v.adminId === adminId);
+        if (!currentVote) {
+        console.error(`Aucun vote en cours pour l'adminId: ${adminId}`);
+        return new Response("Aucun vote en cours pour cet administrateur", { status: 404 });
+        }
+
         if (!currentVote.aVoté.includes(currentUser)) {
             currentVote.votes[vote] += 1;
             currentVote.aVoté.push(currentUser);
 
             const adminCount = users.filter(user => user.status === "admin").length;
             if (currentVote.aVoté.length === adminCount) {
-       
                 if (currentVote.votes.oui > currentVote.votes.non) {
-                  
                     const adminToDemote = users.find(user => user.id === adminId);
                     if (adminToDemote) {
                         adminToDemote.status = "user";
                     }
-                } else {
-                   
                 }
-
                 await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
-
-                votes = votes.filter(vote => vote.adminId !== adminId);
+                votes = votes.filter(v => v.adminId !== adminId);
                 await Deno.writeTextFile(votesFile, JSON.stringify(votes, null, 2));
             }
 
@@ -259,6 +284,18 @@ if (req.method === "POST" && path === "/cast-vote") {
     } catch (error) {
         console.error("Erreur lors du vote :", error.message);
         return new Response("Erreur lors du vote", { status: 500 });
+    }
+}
+
+if (path === "/get-votes") {
+    try {
+        const votes = JSON.parse(await Deno.readTextFile(votesFile));
+        return new Response(JSON.stringify(votes), {
+            headers: { "Content-Type": "application/json" }
+        });
+    } catch (error) {
+        console.error("Erreur lors de la récupération des votes :", error.message);
+        return new Response("Erreur lors de la récupération des votes", { status: 500 });
     }
 }
 

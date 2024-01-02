@@ -97,7 +97,7 @@ async function loginUser() {
     }
 }
 
-window.onload = function() {
+window.onload = async function() {
     const username = getCookie("username");
     const userStatus = getCookie("userStatus");
 
@@ -120,6 +120,7 @@ window.onload = function() {
     }
 
     fetchUsers();
+    await checkForOngoingVote();
 };
 
 function getCookie(name) {
@@ -314,6 +315,15 @@ async function initiateDemotionVote(adminId) {
     const currentUser = getCookie("username");
 
     try {
+        // Récupérer la liste actuelle des votes
+        const currentVotes = await (await fetch('/get-votes')).json();
+
+        // Vérifier s'il y a déjà un vote en cours
+        if (currentVotes.length > 0) {
+            alert('Un vote est déjà en cours. Veuillez attendre sa conclusion.');
+            return;
+        }
+
         const response = await fetch('/initiate-demotion-vote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -321,8 +331,17 @@ async function initiateDemotionVote(adminId) {
         });
 
         if (response.ok) {
+            const users = await (await fetch('/get-users')).json();
+            const adminToDemote = users.find(user => user.id === adminId);
+
+            if (adminToDemote) {
+                const voteSection = document.getElementById('voteSection');
+                voteSection.querySelector('h3').textContent = `Vote pour démotion de l'admin ${adminToDemote.username}`;
+                voteSection.style.display = 'block';
+                voteSection.setAttribute('data-admin-id', adminId);  
+            }
+            
             alert('Vote pour démotion initié');
-            document.getElementById('voteSection').style.display = 'block'; // Afficher la section de vote
         } else {
             throw new Error('Erreur lors de l’initiation du vote pour démotion');
         }
@@ -331,18 +350,62 @@ async function initiateDemotionVote(adminId) {
     }
 }
 
-async function castVote(adminId, vote) {
+async function checkForOngoingVote() {
+    const userStatus = getCookie("userStatus");
+
+    if (userStatus !== "admin") {
+        return;
+    }
+
+    const votes = await (await fetch('/get-votes')).json();
+    if (votes.length > 0) {
+        const adminId = votes[0].adminId;
+        const users = await (await fetch('/get-users')).json();
+        const adminToDemote = users.find(user => user.id === adminId);
+        if (adminToDemote) {
+            const voteSection = document.getElementById('voteSection');
+            voteSection.querySelector('h3').textContent = `Vote pour démotion de l'admin ${adminToDemote.username}`;
+            voteSection.style.display = 'block';
+            voteSection.setAttribute('data-admin-id', adminId); // Stocker l'ID de l'admin dans un attribut
+        }
+    }
+}
+
+
+async function castVote(vote) {
     const currentUser = getCookie("username");
+    const userStatus = getCookie("userStatus");
+
+    if (userStatus !== "admin") {
+        alert("Seuls les administrateurs peuvent voter.");
+        return;
+    }
+
+    const voteSection = document.getElementById('voteSection');
+    const adminId = voteSection.getAttribute('data-admin-id'); // Récupérer l'ID de l'admin à partir de l'attribut
+
+    if (!adminId) {
+        alert("Aucun vote en cours.");
+        return;
+    }
 
     try {
-        await fetch('/cast-vote', {
+        const response = await fetch('/cast-vote', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ adminId, vote, currentUser })
         });
-        alert('Vote enregistré');
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Erreur lors du vote:', errorText);
+            alert('Erreur lors du vote: ' + errorText);
+        } else {
+            alert('Vote enregistré');
+        }
     } catch (error) {
         console.error('Erreur lors du vote:', error);
+        alert('Erreur lors du vote: ' + error);
     }
 }
 

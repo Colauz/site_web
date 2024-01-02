@@ -33,13 +33,11 @@
     </div>
 
     <div id="voteSection" style="display: none;">
-        <h3>Vote pour démotion de l'admin</h3>
+        <h3>Vote pour démotion de l'admin <span id="adminName"></span></h3>
         <div id="voteProgressBar"></div>
-        <button onclick="castVote(adminId, 'oui')">Oui</button>
-        <button onclick="castVote(adminId, 'non')">Non</button>
+        <button onclick="castVote('oui')">Oui</button>
+        <button onclick="castVote('non')">Non</button>
     </div>
-
-
 
 </body>
 
