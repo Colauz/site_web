@@ -4,6 +4,18 @@ import { join } from "https://deno.land/std@0.123.0/path/mod.ts";
 const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
 
+const votesFile = join(currentDirectory, "votes.json");
+
+async function initializeVotesFile() {
+    try {
+        await Deno.readTextFile(votesFile);
+    } catch {
+        await Deno.writeTextFile(votesFile, JSON.stringify([]));
+    }
+}
+
+initializeVotesFile();
+
 async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
     let path = url.pathname;
@@ -202,6 +214,51 @@ if (path === "/get-users") {
     } catch (error) {
         console.error("Erreur lors de la récupération des utilisateurs :", error.message);
         return new Response("Erreur lors de la récupération des utilisateurs", { status: 500 });
+    }
+}
+
+if (req.method === "POST" && path === "/cast-vote") {
+    try {
+        const { adminId, vote, currentUser } = await req.json();
+        let users = JSON.parse(await Deno.readTextFile(usersFile));
+        let votes = JSON.parse(await Deno.readTextFile(votesFile));
+
+        const votingUser = users.find(user => user.username === currentUser);
+        if (!votingUser || votingUser.status !== "admin") {
+            return new Response("Seuls les administrateurs peuvent voter", { status: 403 });
+        }
+
+        let currentVote = votes.find(vote => vote.adminId === adminId);
+        if (!currentVote.aVoté.includes(currentUser)) {
+            currentVote.votes[vote] += 1;
+            currentVote.aVoté.push(currentUser);
+
+            const adminCount = users.filter(user => user.status === "admin").length;
+            if (currentVote.aVoté.length === adminCount) {
+       
+                if (currentVote.votes.oui > currentVote.votes.non) {
+                  
+                    const adminToDemote = users.find(user => user.id === adminId);
+                    if (adminToDemote) {
+                        adminToDemote.status = "user";
+                    }
+                } else {
+                   
+                }
+
+                await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
+
+                votes = votes.filter(vote => vote.adminId !== adminId);
+                await Deno.writeTextFile(votesFile, JSON.stringify(votes, null, 2));
+            }
+
+            return new Response("Vote enregistré", { status: 200 });
+        } else {
+            return new Response("Vous avez déjà voté", { status: 403 });
+        }
+    } catch (error) {
+        console.error("Erreur lors du vote :", error.message);
+        return new Response("Erreur lors du vote", { status: 500 });
     }
 }
 

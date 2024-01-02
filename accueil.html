@@ -32,6 +32,14 @@
         <button onclick="deleteUser(user.id)" class="delete-btn">Supprimer</button>
     </div>
 
+    <div id="voteSection" style="display: none;">
+        <h3>Vote pour démotion de l'admin</h3>
+        <div id="voteProgressBar"></div>
+        <button onclick="castVote(adminId, 'oui')">Oui</button>
+        <button onclick="castVote(adminId, 'non')">Non</button>
+    </div>
+
+
 
 </body>
 

@@ -205,6 +205,7 @@ async function deleteUser(userId) {
 function displayUsers(users) {
     const container = document.getElementById('userListContainer');
     const currentUserStatus = getCookie("userStatus");
+    const currentUsername = getCookie("username"); // Récupérer le nom d'utilisateur actuel depuis les cookies
     container.innerHTML = '';
 
     users.forEach(user => {
@@ -225,8 +226,7 @@ function displayUsers(users) {
         userStatus.textContent = `Statut: ${user.status}`;
         userCard.appendChild(userStatus);
 
-        const currentUserStatus = getCookie("userStatus");
-        if (currentUserStatus === "admin" && user.status !== "admin") {
+        if (currentUserStatus === "admin" && user.username !== currentUsername) {
             const manageButton = document.createElement('button');
             manageButton.textContent = 'Gérer';
             manageButton.className = 'manage-btn';
@@ -237,15 +237,22 @@ function displayUsers(users) {
             manageOptions.className = 'manage-options';
             manageOptions.id = `manage-options-${user.id}`;
 
-            const deleteOption = document.createElement('li');
-            deleteOption.textContent = 'Supprimer';
-            deleteOption.onclick = () => deleteUser(user.id);
-            manageOptions.appendChild(deleteOption);
+            if (user.status !== "admin") {
+                const deleteOption = document.createElement('li');
+                deleteOption.textContent = 'Supprimer';
+                deleteOption.onclick = () => deleteUser(user.id);
+                manageOptions.appendChild(deleteOption);
 
-            const promoteOption = document.createElement('li');
-            promoteOption.textContent = 'Promouvoir en admin';
-            promoteOption.onclick = () => promoteUser(user.id);
-            manageOptions.appendChild(promoteOption);
+                const promoteOption = document.createElement('li');
+                promoteOption.textContent = 'Promouvoir en admin';
+                promoteOption.onclick = () => promoteUser(user.id);
+                manageOptions.appendChild(promoteOption);
+            } else {
+                const demoteOption = document.createElement('li');
+                demoteOption.textContent = 'Démotion';
+                demoteOption.onclick = () => initiateDemotionVote(user.id);
+                manageOptions.appendChild(demoteOption);                
+            }
 
             userCard.appendChild(manageOptions);
         }
@@ -300,6 +307,42 @@ async function promoteUser(userId) {
     } catch (error) {
         console.error('Erreur lors de la promotion:', error);
         alert('Erreur lors de la promotion de l’utilisateur');
+    }
+}
+
+async function initiateDemotionVote(adminId) {
+    const currentUser = getCookie("username");
+
+    try {
+        const response = await fetch('/initiate-demotion-vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminId, currentUser })
+        });
+
+        if (response.ok) {
+            alert('Vote pour démotion initié');
+            document.getElementById('voteSection').style.display = 'block'; // Afficher la section de vote
+        } else {
+            throw new Error('Erreur lors de l’initiation du vote pour démotion');
+        }
+    } catch (error) {
+        console.error('Erreur lors de l’initiation du vote pour démotion:', error);
+    }
+}
+
+async function castVote(adminId, vote) {
+    const currentUser = getCookie("username");
+
+    try {
+        await fetch('/cast-vote', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ adminId, vote, currentUser })
+        });
+        alert('Vote enregistré');
+    } catch (error) {
+        console.error('Erreur lors du vote:', error);
     }
 }
 

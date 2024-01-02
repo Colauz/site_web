@@ -93,3 +93,14 @@ body {
 .manage-options li:hover {
     background-color: #f1f1f1;
 }
+
+#voteProgressBar {
+    width: 100%;
+    background-color: #ddd;
+}
+
+.voteProgress {
+    height: 20px;
+    background-color: #4CAF50;
+    width: 0%;
+}
