@@ -15,15 +15,15 @@
     "username": "Coucou",
     "password": "ehD3r47FV*",
     "inscriptionDate": "2024-01-02T12:24:35.826Z",
-    "status": "admin"
+    "status": "superadmin"
   },
   {
     "id": 3,
-    "firstName": "dfdfdfdfd",
-    "lastName": "fdfdfdfdfdf",
-    "username": "Coucoudfdfdf",
+    "firstName": "dsqdqsdqsd",
+    "lastName": "sqdqsdsqdsq",
+    "username": "Coucoudsqd",
     "password": "ehD3r47FV*",
-    "inscriptionDate": "2024-01-02T12:34:36.144Z",
+    "inscriptionDate": "2024-01-02T17:47:11.804Z",
     "status": "admin"
   }
 ]

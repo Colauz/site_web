@@ -4,18 +4,6 @@ import { join } from "https://deno.land/std@0.123.0/path/mod.ts";
 const currentDirectory = Deno.cwd();
 const usersFile = join(currentDirectory, "users.json");
 
-const votesFile = join(currentDirectory, "votes.json");
-
-async function initializeVotesFile() {
-    try {
-        await Deno.readTextFile(votesFile);
-    } catch {
-        await Deno.writeTextFile(votesFile, JSON.stringify([]));
-    }
-}
-
-initializeVotesFile();
-
 async function handler(req: Request): Promise<Response> {
     const url = new URL(req.url);
     let path = url.pathname;
@@ -185,7 +173,7 @@ if (req.method === "POST" && path === "/promote-user") {
 
         const requestingUser = users.find(user => user.username === currentUser);
 
-        if (!requestingUser || requestingUser.status !== "admin") {
+        if (!requestingUser || (requestingUser.status !== "admin" && requestingUser.status !== "superadmin")) {
             return new Response("Opération non autorisée", { status: 403 });
         }
 
@@ -217,85 +205,30 @@ if (path === "/get-users") {
     }
 }
 
-if (req.method === "POST" && path === "/initiate-demotion-vote") {
+if (req.method === "POST" && path === "/demote-user") {
     try {
-        const { adminId, currentUser } = await req.json();
+        const { userId, currentUser } = await req.json();
         let users = JSON.parse(await Deno.readTextFile(usersFile));
-        let votes = JSON.parse(await Deno.readTextFile(votesFile));
 
-        // Vérifiez si un vote est déjà en cours
-        if (votes.length > 0) {
-            return new Response("Un vote est déjà en cours", { status: 403 });
+        const requestingUser = users.find(user => user.username === currentUser);
+
+        if (!requestingUser || requestingUser.status !== "superadmin") {
+            return new Response("Opération non autorisée", { status: 403 });
         }
 
-        const initiatingUser = users.find(user => user.username === currentUser);
-        if (!initiatingUser || initiatingUser.status !== "admin") {
-            return new Response("Seuls les administrateurs peuvent initier un vote", { status: 403 });
+        const userToDemote = users.find(user => user.id === userId);
+        if (!userToDemote) {
+            return new Response("Utilisateur non trouvé", { status: 404 });
         }
 
-        votes.push({ adminId: adminId, votes: { oui: 0, non: 0 }, aVoté: [] });
-        await Deno.writeTextFile(votesFile, JSON.stringify(votes, null, 2));
+        userToDemote.status = "user";
 
-        return new Response("Vote pour la démotion initié", { status: 200 });
+        await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
+
+        return new Response("Utilisateur démote avec succès", { status: 200 });
     } catch (error) {
-        console.error("Erreur lors de l'initiation du vote pour démotion :", error.message);
-        return new Response("Erreur lors de l'initiation du vote pour démotion", { status: 500 });
-    }
-}
-
-if (req.method === "POST" && path === "/cast-vote") {
-    try {
-        const { adminId, vote, currentUser } = await req.json();
-        let users = JSON.parse(await Deno.readTextFile(usersFile));
-        let votes = JSON.parse(await Deno.readTextFile(votesFile));
-
-        const votingUser = users.find(user => user.username === currentUser);
-        if (!votingUser || votingUser.status !== "admin") {
-            return new Response("Seuls les administrateurs peuvent voter", { status: 403 });
-        }
-
-        let currentVote = votes.find(v => v.adminId === adminId);
-        if (!currentVote) {
-        console.error(`Aucun vote en cours pour l'adminId: ${adminId}`);
-        return new Response("Aucun vote en cours pour cet administrateur", { status: 404 });
-        }
-
-        if (!currentVote.aVoté.includes(currentUser)) {
-            currentVote.votes[vote] += 1;
-            currentVote.aVoté.push(currentUser);
-
-            const adminCount = users.filter(user => user.status === "admin").length;
-            if (currentVote.aVoté.length === adminCount) {
-                if (currentVote.votes.oui > currentVote.votes.non) {
-                    const adminToDemote = users.find(user => user.id === adminId);
-                    if (adminToDemote) {
-                        adminToDemote.status = "user";
-                    }
-                }
-                await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
-                votes = votes.filter(v => v.adminId !== adminId);
-                await Deno.writeTextFile(votesFile, JSON.stringify(votes, null, 2));
-            }
-
-            return new Response("Vote enregistré", { status: 200 });
-        } else {
-            return new Response("Vous avez déjà voté", { status: 403 });
-        }
-    } catch (error) {
-        console.error("Erreur lors du vote :", error.message);
-        return new Response("Erreur lors du vote", { status: 500 });
-    }
-}
-
-if (path === "/get-votes") {
-    try {
-        const votes = JSON.parse(await Deno.readTextFile(votesFile));
-        return new Response(JSON.stringify(votes), {
-            headers: { "Content-Type": "application/json" }
-        });
-    } catch (error) {
-        console.error("Erreur lors de la récupération des votes :", error.message);
-        return new Response("Erreur lors de la récupération des votes", { status: 500 });
+        console.error("Erreur lors de la démote de l'utilisateur :", error.message);
+        return new Response("Erreur lors de la démote de l'utilisateur", { status: 500 });
     }
 }
 
@@ -306,7 +239,8 @@ if (req.method === "POST" && path === "/delete-user") {
 
         const requestingUser = users.find(user => user.username === currentUser);
 
-        if (!requestingUser || requestingUser.status !== "admin") {
+        // Permettre la suppression par un admin ou un superadmin
+        if (!requestingUser || (requestingUser.status !== "admin" && requestingUser.status !== "superadmin")) {
             return new Response("Opération non autorisée", { status: 403 });
         }
 
@@ -318,7 +252,7 @@ if (req.method === "POST" && path === "/delete-user") {
         users = users.filter(user => user.id !== userId);
         await Deno.writeTextFile(usersFile, JSON.stringify(users, null, 2));
 
-        console.log(`Utilisateur '${userToDelete.username}' supprimé par l'administrateur '${currentUser}'`);
+        console.log(`Utilisateur '${userToDelete.username}' supprimé par '${requestingUser.status}' '${currentUser}'`);
 
         return new Response("Utilisateur supprimé", { status: 200 });
     } catch (error) {
@@ -326,6 +260,7 @@ if (req.method === "POST" && path === "/delete-user") {
         return new Response("Erreur lors de la suppression de l'utilisateur", { status: 500 });
     }
 }
+
 
     try {
         const filePath = join(currentDirectory, path.substring(1));
